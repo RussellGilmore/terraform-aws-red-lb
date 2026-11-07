@@ -35,20 +35,30 @@ locals {
     k => distinct(concat([tg.port], [for t in values(tg.targets) : coalesce(t.port, tg.port)]))
   }
 
+  # Health-check port(s) per target group. Both branches are list(number),
+  # so the conditional is type-consistent.
+  health_ports = {
+    for k, tg in var.target_groups :
+    k => tg.health_check.port == "traffic-port" ? local.target_ports[k] : [tonumber(tg.health_check.port)]
+  }
+
   # Egress the load balancer needs: forwarding on each target port, plus TCP
-  # on the health-check port. Keyed by protocol and port, so duplicates
+  # on the health-check port(s). Keyed by protocol and port, so duplicates
   # across target groups collapse.
-  egress_ports = merge([
-    for k, tg in var.target_groups : merge(
-      {
+  egress_ports = merge(concat(
+    [
+      for k, tg in var.target_groups : {
         for pair in setproduct(local.protocol_map[tg.protocol], local.target_ports[k]) :
         "${pair[0]}-${pair[1]}" => { protocol = pair[0], port = pair[1] }
-      },
-      tg.health_check.port == "traffic-port"
-      ? { for p in local.target_ports[k] : "tcp-${p}" => { protocol = "tcp", port = p } }
-      : { "tcp-${tg.health_check.port}" => { protocol = "tcp", port = tonumber(tg.health_check.port) } }
-    )
-  ]...)
+      }
+    ],
+    [
+      for k, tg in var.target_groups : {
+        for p in local.health_ports[k] :
+        "tcp-${p}" => { protocol = "tcp", port = p }
+      }
+    ]
+  )...)
 
   target_cidr_blocks = coalesce(var.target_cidr_blocks, [data.aws_vpc.this.cidr_block])
 
