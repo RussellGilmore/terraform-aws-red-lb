@@ -80,6 +80,10 @@ module "target" {
   EOF
 }
 
+# Justification: test example only. The forward listener serves plain HTTP
+# because CI has no hosted zone for a certificate; real deployments forward
+# from an HTTPS listener and redirect HTTP (see the README).
+# trivy:ignore:AVD-AWS-0054
 module "alb" {
   source = "../../"
 
