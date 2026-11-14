@@ -1,0 +1,33 @@
+# Red LB Module Testing Workflow
+name: Testing Red LB Module
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v4.0.1
+        with:
+          terraform_version: 1.15.0
+      - name: Set up Go
+        uses: actions/setup-go@v7.0.0
+        with:
+          go-version: "1.26.2"
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+      - name: Setup Dependencies
+        working-directory: tests/
+        run: go get -v -t -d && go mod tidy
+      - name: Test
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        working-directory: tests/
+        run: go test -timeout 45m red_lb_test.go -v
