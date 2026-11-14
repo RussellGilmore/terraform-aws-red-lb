@@ -1,5 +1,7 @@
 # terraform-aws-red-lb
 
+## [![Red LB Module](https://github.com/RussellGilmore/terraform-aws-red-lb/actions/workflows/module-test.yml/badge.svg?branch=main)](https://github.com/RussellGilmore/terraform-aws-red-lb/actions/workflows/module-test.yml)
+
 Terraform module for an AWS Network Load Balancer (NLB) or Application Load
 Balancer (ALB), with its own security group, target groups, listeners, and
 optional public DNS and ACM certificate.
