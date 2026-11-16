@@ -166,8 +166,8 @@ variable "target_groups" {
   }
 
   validation {
-    condition     = alltrue([for k, tg in var.target_groups : length("${var.lb_name}-${k}") <= 32])
-    error_message = "Target group names are \"<lb_name>-<key>\" and must be at most 32 characters. Shorten lb_name or the key."
+    condition     = alltrue([for k, tg in var.target_groups : length("${var.lb_name}-${k}") <= 25])
+    error_message = "Target group names are \"<lb_name>-<key>-<6-character hash>\" and AWS limits them to 32 characters, so \"<lb_name>-<key>\" must be at most 25. Shorten lb_name or the key."
   }
 
   validation {

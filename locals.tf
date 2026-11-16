@@ -97,4 +97,12 @@ locals {
   ]...)
 
   lookup_zone = var.create_certificate || length(var.dns_records) > 0
+
+  # Target group names carry a short hash of the attributes AWS cannot change
+  # in place. Changing one changes the name, so the replacement is created
+  # before the old group is destroyed (see target_groups.tf).
+  target_group_names = {
+    for k, tg in var.target_groups :
+    k => "${var.lb_name}-${k}-${substr(sha1("${tg.port}|${tg.protocol}|${tg.target_type}|${var.vpc_id}"), 0, 6)}"
+  }
 }

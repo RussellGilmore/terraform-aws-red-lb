@@ -1,7 +1,7 @@
 resource "aws_lb_target_group" "this" {
   for_each = var.target_groups
 
-  name        = "${var.lb_name}-${each.key}"
+  name        = local.target_group_names[each.key]
   port        = each.value.port
   protocol    = each.value.protocol
   target_type = each.value.target_type
@@ -27,6 +27,13 @@ resource "aws_lb_target_group" "this" {
     local.tags,
     { Name = "${var.lb_name}-${each.key}" },
   )
+
+  # A listener can't be left pointing at a deleted target group, so the
+  # replacement is created first and the listener repointed before the old
+  # group is destroyed. The hashed name keeps the two from colliding.
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_lb_target_group_attachment" "this" {
@@ -35,4 +42,10 @@ resource "aws_lb_target_group_attachment" "this" {
   target_group_arn = aws_lb_target_group.this[each.value.tg_key].arn
   target_id        = each.value.id
   port             = each.value.port
+
+  # Register targets with a replacement target group before deregistering
+  # them from the old one.
+  lifecycle {
+    create_before_destroy = true
+  }
 }
