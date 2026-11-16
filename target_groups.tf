@@ -42,10 +42,4 @@ resource "aws_lb_target_group_attachment" "this" {
   target_group_arn = aws_lb_target_group.this[each.value.tg_key].arn
   target_id        = each.value.id
   port             = each.value.port
-
-  # Register targets with a replacement target group before deregistering
-  # them from the old one.
-  lifecycle {
-    create_before_destroy = true
-  }
 }
