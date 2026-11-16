@@ -14,7 +14,7 @@ output "lb_zone_id" {
 }
 
 output "security_group_id" {
-  description = "The load balancer's security group. Reference it from targets' ingress rules (e.g. red-instance ingress_rules[*].security_groups)."
+  description = "Ingress rules for the load balancer's security group. Each rule admits traffic from cidr_blocks, security_groups (source security group IDs), or both."
   value       = aws_security_group.lb.id
 }
 

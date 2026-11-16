@@ -92,7 +92,7 @@ variable "access_logs" {
 ####################################################################################################
 # Security Group
 variable "ingress_rules" {
-  description = "Ingress rules for the load balancer's security group. Each rule admits traffic from cidr_blocks, security_groups (source security group IDs), or both. Same shape as red-instance's ingress_rules."
+  description = "Ingress rules for the load balancer's security group. Each rule admits traffic from cidr_blocks, security_groups (source security group IDs), or both."
   type = list(object({
     description     = string
     from_port       = number
